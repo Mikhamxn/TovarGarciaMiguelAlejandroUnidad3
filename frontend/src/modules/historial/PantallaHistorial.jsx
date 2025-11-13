@@ -1,0 +1,179 @@
+import { useEffect, useMemo, useState } from "react";
+import { motion as Motion, AnimatePresence } from "framer-motion";
+import HistoryIcon from "@mui/icons-material/History";
+import MedicalInformationIcon from "@mui/icons-material/MedicalInformation";
+import { clienteHttp } from "../../api/clienteHttp";
+import { EstadoVistaVacia } from "../../components/EstadoVistaVacia";
+import { FormularioHistorial } from "./FormularioHistorial";
+import { EncabezadoPagina } from "../../components/EncabezadoPagina";
+
+export const PantallaHistorial = () => {
+  const [arrMascotas, setArrMascotas] = useState([]);
+  const [intMascotaSeleccionada, setIntMascotaSeleccionada] = useState(null);
+  const [arrHistorial, setArrHistorial] = useState([]);
+  const [blnModal, setBlnModal] = useState(false);
+
+  const cargarMascotas = async () => {
+    const objRespuesta = await clienteHttp.get("/api/mascotas");
+    setArrMascotas(objRespuesta.data.arrMascotas);
+    if (objRespuesta.data.arrMascotas.length > 0) {
+      setIntMascotaSeleccionada(objRespuesta.data.arrMascotas[0].intMascota);
+    }
+  };
+
+  const cargarHistorial = async (intMascota) => {
+    if (!intMascota) return;
+    const objRespuesta = await clienteHttp.get(`/api/mascotas/${intMascota}/historial`);
+    setArrHistorial(objRespuesta.data.arrHistorial);
+  };
+
+  useEffect(() => {
+    cargarMascotas();
+  }, []);
+
+  useEffect(() => {
+    cargarHistorial(intMascotaSeleccionada);
+  }, [intMascotaSeleccionada]);
+
+  const crearRegistro = async (objValores, objAcciones) => {
+    try {
+      await clienteHttp.post(`/api/mascotas/${intMascotaSeleccionada}/historial`, objValores);
+      await cargarHistorial(intMascotaSeleccionada);
+      setBlnModal(false);
+    } catch (objError) {
+      objAcciones.setStatus(objError.response?.data?.strMensaje ?? "No fue posible registrar el historial");
+    } finally {
+      objAcciones.setSubmitting(false);
+    }
+  };
+
+  const objMascotaActual = arrMascotas.find((objMascota) => objMascota.intMascota === intMascotaSeleccionada) ?? null;
+  const hayMascotas = useMemo(() => arrMascotas.length > 0, [arrMascotas.length]);
+
+  return (
+    <div className="page-flow">
+        <EncabezadoPagina
+          etiqueta="Seguimiento clínico"
+          titulo="Historial médico integral"
+          descripcion="Consulta diagnósticos, tratamientos y notas con alta legibilidad para mantener la continuidad clínica de cada paciente."
+          acciones={
+            <Motion.button
+              type="button"
+              onClick={() => setBlnModal(true)}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              disabled={!intMascotaSeleccionada}
+              className="btn-primary"
+            >
+              Registrar consulta
+            </Motion.button>
+          }
+          ilustracion={
+            <div className="icon-stack">
+              <span className="icon-stack__badge">
+                <HistoryIcon fontSize="large" />
+              </span>
+              <p className="icon-stack__caption">Historial sincronizado</p>
+            </div>
+          }
+        />
+
+        <section className="surface-card section-card">
+          <header className="section-card__header">
+            <span className="eyebrow">Ficha clínica</span>
+            <h3 className="section-card__title">Selecciona un paciente</h3>
+            <p className="section-card__subtitle">Elige una mascota para revisar y documentar su historial clínico.</p>
+          </header>
+          <div className="form-grid form-grid--split">
+            <div className="form-field">
+              <label className="form-field__label" htmlFor="filtro-mascota">
+                Mascota
+              </label>
+              <select
+                id="filtro-mascota"
+                value={intMascotaSeleccionada ?? ""}
+                onChange={(event) => {
+                  const strValor = event.target.value;
+                  setIntMascotaSeleccionada(strValor ? Number(strValor) : null);
+                }}
+                disabled={!hayMascotas}
+              >
+                <option value="">Selecciona una mascota</option>
+                {arrMascotas.map((objMascota) => (
+                  <option key={objMascota.intMascota} value={objMascota.intMascota}>
+                    {objMascota.strNombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {objMascotaActual ? (
+              <Motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="info-panel">
+                <div className="info-panel__lead">
+                  <span className="info-panel__lead-icon">
+                    <MedicalInformationIcon fontSize="small" />
+                  </span>
+                  <p>{objMascotaActual.strNombre}</p>
+                </div>
+                {objMascotaActual.strEspecie ? <p className="info-panel__subtitle">{objMascotaActual.strEspecie}</p> : null}
+              </Motion.div>
+            ) : (
+              <div className="empty-hint">Elige un paciente para ver sus registros clínicos</div>
+            )}
+          </div>
+        </section>
+
+        {arrHistorial.length === 0 ? (
+          <EstadoVistaVacia strMensaje="No hay registros médicos" />
+        ) : (
+          <div className="card-grid card-grid--three">
+            {arrHistorial.map((objRegistro) => (
+              <Motion.article key={objRegistro.intHistorial} whileHover={{ y: -4 }} className="surface-card record-card">
+                <div className="record-card__header">
+                  <strong className="record-card__timestamp">
+                    {new Date(objRegistro.dtFechaConsulta).toLocaleString()}
+                  </strong>
+                  <span className="badge-pill badge-pill--soft">Consulta</span>
+                </div>
+                <p className="record-card__text">
+                  <strong>Diagnóstico:</strong> {objRegistro.strDiagnostico}
+                </p>
+                {objRegistro.strTratamiento ? (
+                  <p className="record-card__text">
+                    <strong>Tratamiento:</strong> {objRegistro.strTratamiento}
+                  </p>
+                ) : null}
+                {objRegistro.strNotas ? (
+                  <p className="record-card__text">
+                    <strong>Notas:</strong> {objRegistro.strNotas}
+                  </p>
+                ) : null}
+                {objRegistro.strVeterinario ? <span className="record-card__footer">{objRegistro.strVeterinario}</span> : null}
+              </Motion.article>
+            ))}
+          </div>
+        )}
+
+        <AnimatePresence>
+          {blnModal ? (
+            <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-overlay">
+              <Motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="modal-dialog">
+                <h3 className="modal-dialog__title">Nueva consulta para {objMascotaActual?.strNombre ?? ""}</h3>
+                <FormularioHistorial onSubmit={crearRegistro} />
+                <div className="modal-dialog__actions">
+                  <Motion.button
+                    type="button"
+                    onClick={() => setBlnModal(false)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.96 }}
+                    className="modal-dialog__close"
+                  >
+                    Cancelar
+                  </Motion.button>
+                </div>
+              </Motion.div>
+            </Motion.div>
+          ) : null}
+        </AnimatePresence>
+      </div>
+    );
+};
