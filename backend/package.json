@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon src/index.js",
     "start": "node src/index.js",
-    "test": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --runInBand"
+    "test": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
+    "seed:usuario1": "node src/database/seeds/seedUsuario1.js"
   },
   "keywords": [
     "express",
@@ -26,6 +27,7 @@
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "node-fetch": "^3.3.2",
     "sequelize": "^6.37.7",
     "tedious": "^18.6.1"
   },

@@ -4,6 +4,7 @@ import rutasVacunas from "./vacunaRoutes.js";
 import rutasCitas from "./citaRoutes.js";
 import rutasAlergias from "./alergiaRoutes.js";
 import rutasHistorial from "./historialRoutes.js";
+import rutasBienestar from "./bienestarRoutes.js";
 
 export const registrarRutas = (objApp) => {
   objApp.use(rutasAuth);
@@ -12,4 +13,5 @@ export const registrarRutas = (objApp) => {
   objApp.use(rutasCitas);
   objApp.use(rutasAlergias);
   objApp.use(rutasHistorial);
+  objApp.use(rutasBienestar);
 };

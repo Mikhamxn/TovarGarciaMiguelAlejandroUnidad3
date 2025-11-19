@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion as Motion } from "framer-motion";
 import PetsIcon from "@mui/icons-material/Pets";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
@@ -6,8 +6,10 @@ import VaccinesIcon from "@mui/icons-material/Vaccines";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import InsightsIcon from "@mui/icons-material/Insights";
+import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates";
 import { TarjetaResumen } from "../../components/TarjetaResumen";
 import { EncabezadoPagina } from "../../components/EncabezadoPagina";
+import { clienteHttp } from "../../api/clienteHttp";
 
 const datosResumen = [
   {
@@ -32,6 +34,28 @@ const datosResumen = [
 
 export const PantallaDashboard = () => {
   const tarjetas = useMemo(() => datosResumen, []);
+  const [objInspiracion, setObjInspiracion] = useState(null);
+  const [blnCargandoInspiracion, setBlnCargandoInspiracion] = useState(false);
+  const [strErrorInspiracion, setStrErrorInspiracion] = useState("");
+
+  const obtenerInspiracion = async () => {
+    try {
+      setBlnCargandoInspiracion(true);
+      setStrErrorInspiracion("");
+      const objRespuesta = await clienteHttp.get("/api/bienestar/dato-curioso");
+      setObjInspiracion(objRespuesta.data.objDato);
+    } catch (objError) {
+      setStrErrorInspiracion(
+        objError.response?.data?.strMensaje ?? "No fue posible cargar la inspiración canina."
+      );
+    } finally {
+      setBlnCargandoInspiracion(false);
+    }
+  };
+
+  useEffect(() => {
+    obtenerInspiracion();
+  }, []);
 
   return (
     <div className="page-flow">
@@ -154,6 +178,73 @@ export const PantallaDashboard = () => {
           </div>
         </Motion.section>
       </div>
+
+      <Motion.section
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.15 }}
+        className="surface-card section-card"
+      >
+        <header className="section-card__header">
+          <span className="eyebrow">Inspiración externa</span>
+          <h3 className="section-card__title">Cierra tu jornada con motivación</h3>
+          <p className="section-card__subtitle">
+            Consumimos la API pública de Dog CEO y mostramos una foto aleatoria para recordarte la meta: perros sanos y felices.
+          </p>
+        </header>
+
+        <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-center">
+          <div className="flex flex-1 flex-col gap-4 rounded-2xl border border-contrast/10 bg-surface/80 p-4 lg:flex-row lg:items-center">
+            <div className="flex flex-1 items-start gap-3">
+              <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-secondary/15 text-secondary">
+                <TipsAndUpdatesIcon fontSize="medium" />
+              </span>
+              <div className="space-y-2 text-sm">
+                {blnCargandoInspiracion ? (
+                  <p className="text-contrast/70">Buscando una nueva fotografía...</p>
+                ) : strErrorInspiracion ? (
+                  <p className="text-red-400">{strErrorInspiracion}</p>
+                ) : objInspiracion ? (
+                  <>
+                    <p className="text-base font-medium text-contrast">
+                      {objInspiracion.strRaza ? `Raza destacada: ${objInspiracion.strRaza}` : "Inspírate con esta mirada"}
+                    </p>
+                    <div className="text-xs text-contrast/60">
+                      <span>Fuente: {objInspiracion.strFuente}</span>
+                      {objInspiracion.dtActualizado ? (
+                        <span className="ml-2">
+                          Actualizado: {" "}
+                          {new Date(objInspiracion.dtActualizado).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      ) : null}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-contrast/70">Obtén tu primera inspiración visual.</p>
+                )}
+              </div>
+            </div>
+            {objInspiracion?.strImagen ? (
+              <img
+                src={objInspiracion.strImagen}
+                alt={`Perro aleatorio ${objInspiracion.strRaza ?? "sin raza identificada"}`}
+                loading="lazy"
+                className="h-32 w-full rounded-2xl object-contain shadow-inner lg:h-28 lg:w-52"
+              />
+            ) : null}
+          </div>
+          <Motion.button
+            type="button"
+            onClick={obtenerInspiracion}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            disabled={blnCargandoInspiracion}
+            className="btn-primary min-w-[180px] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {blnCargandoInspiracion ? "Actualizando..." : "Nueva inspiración"}
+          </Motion.button>
+        </div>
+      </Motion.section>
     </div>
   );
 };

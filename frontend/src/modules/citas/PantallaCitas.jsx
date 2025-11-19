@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import ScheduleIcon from "@mui/icons-material/Schedule";
 import { clienteHttp } from "../../api/clienteHttp";
 import { EstadoVistaVacia } from "../../components/EstadoVistaVacia";
+import { EncabezadoPagina } from "../../components/EncabezadoPagina";
 import { FormularioCita } from "./FormularioCita";
 
 export const PantallaCitas = () => {
@@ -49,20 +51,12 @@ export const PantallaCitas = () => {
   const hayMascotas = useMemo(() => arrMascotas.length > 0, [arrMascotas.length]);
 
   return (
-    <div className="space-y-6">
-      <section className="glass-panel border border-contrast/10 px-6 py-6">
-        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-start gap-3">
-            <span className="badge-pill bg-accent/20 text-accent">
-              <EventAvailableIcon fontSize="small" />
-            </span>
-            <div className="space-y-2">
-              <h2 className="font-display text-2xl font-semibold text-contrast">Citas veterinarias</h2>
-              <p className="text-sm text-contrast/70">
-                Agenda visitas, lleva notas y confirma citas para que tus mascotas nunca pierdan su control médico.
-              </p>
-            </div>
-          </div>
+    <div className="page-flow">
+      <EncabezadoPagina
+        etiqueta="Agenda inteligente"
+        titulo="Citas veterinarias"
+        descripcion="Agenda visitas, lleva notas y confirma citas para que tus mascotas nunca pierdan su control médico."
+        acciones={
           <Motion.button
             type="button"
             onClick={() => setBlnModal(true)}
@@ -73,18 +67,39 @@ export const PantallaCitas = () => {
           >
             Registrar cita
           </Motion.button>
-        </div>
+        }
+        ilustracion={
+          <div className="promo-stack">
+            <span className="promo-stack__badge">
+              <EventAvailableIcon fontSize="large" />
+            </span>
+            <p className="promo-stack__caption">
+              <span>Alertas</span>
+              <span>Seguimiento 24/7</span>
+            </p>
+          </div>
+        }
+      />
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <label className="flex flex-col gap-2 text-sm text-contrast/70">
-            Mascota
+      <section className="surface-card section-card">
+        <header className="section-card__header">
+          <span className="eyebrow">Planificación</span>
+          <h3 className="section-card__title">Filtra la agenda por mascota</h3>
+          <p className="section-card__subtitle">Visualiza pendientes, notas y confirmaciones con un solo vistazo.</p>
+        </header>
+
+        <div className="form-grid form-grid--split">
+          <div className="form-field">
+            <label className="form-field__label" htmlFor="filtro-citas-mascota">
+              Mascota
+            </label>
             <select
+              id="filtro-citas-mascota"
               value={intMascotaSeleccionada ?? ""}
               onChange={(event) => {
                 const strValor = event.target.value;
                 setIntMascotaSeleccionada(strValor ? Number(strValor) : null);
               }}
-              className="rounded-xl border border-contrast/15 bg-surface px-4 py-2 text-sm text-contrast shadow-inner focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/40"
               disabled={!hayMascotas}
             >
               <option value="">Selecciona una mascota</option>
@@ -94,47 +109,62 @@ export const PantallaCitas = () => {
                 </option>
               ))}
             </select>
-          </label>
+          </div>
           {objMascotaActual ? (
             <Motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-accent"
+              className="info-panel"
             >
-              <p className="font-medium">{objMascotaActual.strNombre}</p>
-              {objMascotaActual.strEspecie ? <p className="text-accent/80">{objMascotaActual.strEspecie}</p> : null}
+              <div className="info-panel__lead">
+                <span className="info-panel__lead-icon">
+                  <ScheduleIcon fontSize="small" />
+                </span>
+                <p>{objMascotaActual.strNombre}</p>
+              </div>
+              {objMascotaActual.strEspecie ? (
+                <p className="info-panel__subtitle">{objMascotaActual.strEspecie}</p>
+              ) : null}
             </Motion.div>
-          ) : null}
+          ) : (
+            <div className="empty-hint">Selecciona una mascota para visualizar su agenda</div>
+          )}
         </div>
       </section>
 
       {arrCitas.length === 0 ? (
         <EstadoVistaVacia strMensaje="No hay citas programadas" />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="card-grid card-grid--three">
           {arrCitas.map((objCita) => (
-            <Motion.article
-              key={objCita.intCita}
-              whileHover={{ y: -4 }}
-              className="flex h-full flex-col gap-2 rounded-3xl border border-contrast/10 bg-surface/80 p-5 shadow-card"
-            >
-              <div className="flex items-start justify-between">
-                <strong className="font-display text-lg text-contrast">
+            <Motion.article key={objCita.intCita} whileHover={{ y: -4 }} className="surface-card record-card">
+              <div className="record-card__header">
+                <strong className="record-card__timestamp">
                   {new Date(objCita.dtFechaCita).toLocaleString()}
                 </strong>
-                <span className="badge-pill bg-accent/15 text-xs uppercase tracking-wide text-accent">Agenda</span>
+                <span className="badge-pill badge-pill--soft">Agenda</span>
               </div>
-              <span className="text-sm text-contrast/70">Motivo: {objCita.strMotivo}</span>
+              {objCita.strMotivo ? (
+                <p className="record-card__text">
+                  <strong>Motivo:</strong> {objCita.strMotivo}
+                </p>
+              ) : null}
               {objCita.strVeterinario ? (
-                <span className="text-sm text-contrast/70">Veterinario: {objCita.strVeterinario}</span>
+                <p className="record-card__text">
+                  <strong>Veterinario:</strong> {objCita.strVeterinario}
+                </p>
               ) : null}
               {objCita.strUbicacion ? (
-                <span className="text-sm text-contrast/70">Ubicación: {objCita.strUbicacion}</span>
+                <p className="record-card__text">
+                  <strong>Ubicación:</strong> {objCita.strUbicacion}
+                </p>
               ) : null}
-              {objCita.strNotas ? <span className="text-sm text-contrast/60">Notas: {objCita.strNotas}</span> : null}
-              <span className="text-xs font-semibold uppercase tracking-wide text-contrast/40">
-                {objCita.blnConfirmada ? "Confirmada" : "Pendiente"}
-              </span>
+              {objCita.strNotas ? (
+                <p className="record-card__text">
+                  <strong>Notas:</strong> {objCita.strNotas}
+                </p>
+              ) : null}
+              <span className="record-card__footer">{objCita.blnConfirmada ? "Confirmada" : "Pendiente"}</span>
             </Motion.article>
           ))}
         </div>
