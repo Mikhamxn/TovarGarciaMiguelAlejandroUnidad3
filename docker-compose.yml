@@ -5,14 +5,15 @@ services:
     expose:
       - "3000"
     networks:
-      - dokploy-traefik
+      - dokploy-network
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=dokploy-network"
       - "traefik.http.routers.mimascota.rule=Host(`mimascota.gridstudio.app`)"
       - "traefik.http.services.mimascota.loadbalancer.server.port=3000"
-      - "traefik.http.routers.mimascota.entrypoints=websecure"
+      - "traefik.http.routers.mimascota.entrypoints=web,websecure"
       - "traefik.http.routers.mimascota.tls.certresolver=letsencrypt"
 
 networks:
-  dokploy-traefik:
+  dokploy-network:
     external: true
