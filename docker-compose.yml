@@ -2,17 +2,16 @@ services:
   mimascota:
     build: .
     restart: always
-    expose:
-      - "3000"
     networks:
       - dokploy-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=dokploy-network"
-      - "traefik.http.routers.mimascota.rule=Host(`mimascota.gridstudio.app`)"
-      - "traefik.http.services.mimascota.loadbalancer.server.port=3000"
-      - "traefik.http.routers.mimascota.entrypoints=web,websecure"
-      - "traefik.http.routers.mimascota.tls.certresolver=letsencrypt"
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=dokploy-network"
+        - "traefik.http.routers.mimascota.rule=Host(`mimascota.gridstudio.app`)"
+        - "traefik.http.services.mimascota.loadbalancer.server.port=3000"
+        - "traefik.http.routers.mimascota.entrypoints=web,websecure"
+        - "traefik.http.routers.mimascota.tls.certresolver=letsencrypt"
 
 networks:
   dokploy-network:
