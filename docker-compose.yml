@@ -1,6 +1,9 @@
 services:
   mimascota:
-    build: .
+    build:
+      context: .
+      args:
+        VITE_API_URL: ${VITE_API_URL}
     restart: always
     networks:
       - dokploy-network
