@@ -17,6 +17,7 @@ services:
       - PORT
       - JWT_SECRET
       - API_NOTICIAS_URL
+      - VITE_API_URL
       - DB_DIALECT
       - DB_HOST
       - DB_PORT
