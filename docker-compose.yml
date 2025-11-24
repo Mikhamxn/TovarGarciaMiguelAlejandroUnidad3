@@ -12,6 +12,21 @@ services:
         - "traefik.http.services.mimascota.loadbalancer.server.port=3000"
         - "traefik.http.routers.mimascota.entrypoints=web,websecure"
         - "traefik.http.routers.mimascota.tls.certresolver=letsencrypt"
+    environment:
+      - NODE_ENV
+      - PORT
+      - JWT_SECRET
+      - API_NOTICIAS_URL
+      - DB_DIALECT
+      - DB_HOST
+      - DB_PORT
+      - DB_NAME
+      - DB_USER
+      - DB_PASSWORD
+      - DB_ENCRYPT
+      - SQL_COL_ROL
+      - SQL_LOGGING
+      - CORS_ORIGENES
 
 networks:
   dokploy-network:
