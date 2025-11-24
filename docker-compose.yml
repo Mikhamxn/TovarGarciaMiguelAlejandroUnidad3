@@ -1,12 +1,10 @@
-version: "3.8"
-
 services:
   mimascota:
     build: .
     restart: always
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.mimascota.rule=Host(`tudominio.com`)"
+      - "traefik.http.routers.mimascota.rule=Host(`gridstudio.app`)"
       - "traefik.http.services.mimascota.loadbalancer.server.port=3000"
