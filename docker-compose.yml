@@ -6,5 +6,7 @@ services:
       - "3000"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.mimascota.rule=Host(`gridstudio.app`)"
+      - "traefik.http.routers.mimascota.rule=Host(`mimascota.gridstudio.app`)"
       - "traefik.http.services.mimascota.loadbalancer.server.port=3000"
+      - "traefik.http.routers.mimascota.entrypoints=websecure"
+      - "traefik.http.routers.mimascota.tls.certresolver=letsencrypt"
