@@ -1,11 +1,20 @@
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { motion as Motion } from "framer-motion";
+import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
+import Stack from "@mui/material/Stack";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 const esquemaCita = Yup.object({
   dtFechaCita: Yup.date().required("La fecha es obligatoria"),
   strMotivo: Yup.string().required("El motivo es obligatorio")
 });
+
+const MotionButton = Motion(Button);
 
 export const FormularioCita = ({ objInicial = {}, onSubmit, arrTipos = [] }) => (
   <Formik
@@ -21,99 +30,135 @@ export const FormularioCita = ({ objInicial = {}, onSubmit, arrTipos = [] }) => 
     validationSchema={esquemaCita}
     onSubmit={onSubmit}
   >
-    {({ isSubmitting, status }) => (
-      <Form className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-contrast" htmlFor="dtFechaCita">
-            Fecha y hora
-          </label>
-          <Field
-            id="dtFechaCita"
-            name="dtFechaCita"
-            type="datetime-local"
-            className="w-full rounded-2xl border border-contrast/15 bg-surface px-4 py-2 text-sm text-contrast shadow-inner focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/40"
-          />
-          <ErrorMessage name="dtFechaCita" component="span" className="text-xs font-medium text-rose-500" />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-contrast" htmlFor="intCatTipoCita">
-            Tipo de cita
-          </label>
-          <Field
-            as="select"
-            id="intCatTipoCita"
-            name="intCatTipoCita"
-            className="w-full rounded-2xl border border-contrast/15 bg-surface px-4 py-2 text-sm text-contrast shadow-inner focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/40"
-          >
-            <option value="">Selecciona un tipo</option>
-            {arrTipos.map((objTipo) => (
-              <option key={objTipo.intCatTipoCita} value={objTipo.intCatTipoCita}>
-                {objTipo.strNombre}
-              </option>
-            ))}
+    {({ isSubmitting, status, values }) => (
+      <Form>
+        <Stack spacing={3}>
+          <Field name="dtFechaCita">
+            {({ field, meta }) => (
+              <TextField
+                {...field}
+                type="datetime-local"
+                fullWidth
+                label="Fecha y hora"
+                size="small"
+                variant="outlined"
+                InputLabelProps={{ shrink: true }}
+                error={meta.touched && Boolean(meta.error)}
+                helperText={meta.touched && meta.error ? meta.error : " "}
+              />
+            )}
           </Field>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-contrast" htmlFor="strMotivo">
-              Motivo
-            </label>
-            <Field
-              id="strMotivo"
-              name="strMotivo"
-              className="w-full rounded-2xl border border-contrast/15 bg-surface px-4 py-2 text-sm text-contrast shadow-inner focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/40"
-            />
-            <ErrorMessage name="strMotivo" component="span" className="text-xs font-medium text-rose-500" />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-contrast" htmlFor="strVeterinario">
-              Veterinario
-            </label>
-            <Field
-              id="strVeterinario"
-              name="strVeterinario"
-              className="w-full rounded-2xl border border-contrast/15 bg-surface px-4 py-2 text-sm text-contrast shadow-inner focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/40"
-            />
-          </div>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-contrast" htmlFor="strUbicacion">
-              Ubicación
-            </label>
-            <Field
-              id="strUbicacion"
-              name="strUbicacion"
-              className="w-full rounded-2xl border border-contrast/15 bg-surface px-4 py-2 text-sm text-contrast shadow-inner focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/40"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-contrast" htmlFor="strNotas">
-              Notas
-            </label>
-            <Field
-              as="textarea"
-              id="strNotas"
-              name="strNotas"
-              rows="3"
-              className="h-full w-full rounded-2xl border border-contrast/15 bg-surface px-4 py-2 text-sm text-contrast shadow-inner focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/40"
-            />
-          </div>
-        </div>
-        <label className="flex items-center gap-2 text-sm text-contrast/70">
-          <Field type="checkbox" name="blnConfirmada" className="h-4 w-4 rounded border-contrast/30 bg-surface text-accent focus:ring-accent/40" />
-          Cita confirmada
-        </label>
-        {status ? <span className="text-xs font-medium text-rose-500">{status}</span> : null}
-        <Motion.button
-          type="submit"
-          disabled={isSubmitting}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
-          className="btn-primary w-full justify-center disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          Guardar cita
-        </Motion.button>
+
+          <Field name="intCatTipoCita">
+            {({ field, meta }) => (
+              <TextField
+                {...field}
+                select
+                fullWidth
+                label="Tipo de cita"
+                size="small"
+                variant="outlined"
+                error={meta.touched && Boolean(meta.error)}
+                helperText={meta.touched && meta.error ? meta.error : " "}
+              >
+                <MenuItem value="">Selecciona un tipo</MenuItem>
+                {arrTipos.map((objTipo) => (
+                  <MenuItem key={objTipo.intCatTipoCita} value={objTipo.intCatTipoCita}>
+                    {objTipo.strNombre}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
+          </Field>
+
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+            <Field name="strMotivo">
+              {({ field, meta }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="Motivo"
+                  size="small"
+                  variant="outlined"
+                  error={meta.touched && Boolean(meta.error)}
+                  helperText={meta.touched && meta.error ? meta.error : " "}
+                />
+              )}
+            </Field>
+
+            <Field name="strVeterinario">
+              {({ field, meta }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="Veterinario"
+                  size="small"
+                  variant="outlined"
+                  error={meta.touched && Boolean(meta.error)}
+                  helperText={meta.touched && meta.error ? meta.error : " "}
+                />
+              )}
+            </Field>
+          </Stack>
+
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+            <Field name="strUbicacion">
+              {({ field, meta }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="Ubicación"
+                  size="small"
+                  variant="outlined"
+                  error={meta.touched && Boolean(meta.error)}
+                  helperText={meta.touched && meta.error ? meta.error : " "}
+                />
+              )}
+            </Field>
+
+            <Field name="strNotas">
+              {({ field, meta }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="Notas"
+                  size="small"
+                  variant="outlined"
+                  multiline
+                  minRows={3}
+                  maxRows={5}
+                  error={meta.touched && Boolean(meta.error)}
+                  helperText={meta.touched && meta.error ? meta.error : " "}
+                />
+              )}
+            </Field>
+          </Stack>
+
+          <Field name="blnConfirmada">
+            {({ field }) => (
+              <FormControlLabel
+                control={<Checkbox {...field} checked={field.value} />}
+                label="Cita confirmada"
+                sx={{ color: "text.secondary", m: 0 }}
+              />
+            )}
+          </Field>
+
+          {status ? <Alert severity="error" variant="outlined" sx={{ borderRadius: 3 }}>{status}</Alert> : null}
+
+          <MotionButton
+            type="submit"
+            variant="contained"
+            disabled={isSubmitting}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            disableElevation
+            fullWidth
+            sx={{ borderRadius: 999, py: 1.25, textTransform: "none" }}
+          >
+            Guardar cita
+          </MotionButton>
+        </Stack>
       </Form>
     )}
   </Formik>

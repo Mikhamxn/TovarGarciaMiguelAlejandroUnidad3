@@ -1,11 +1,17 @@
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { motion as Motion } from "framer-motion";
+import TextField from "@mui/material/TextField";
+import Stack from "@mui/material/Stack";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
 
 const esquemaHistorial = Yup.object({
   dtFechaConsulta: Yup.date().required("La fecha es obligatoria"),
   strDiagnostico: Yup.string().required("El diagnóstico es obligatorio")
 });
+
+const MotionButton = Motion(Button);
 
 export const FormularioHistorial = ({ objInicial = {}, onSubmit }) => (
   <Formik
@@ -20,76 +26,103 @@ export const FormularioHistorial = ({ objInicial = {}, onSubmit }) => (
     onSubmit={onSubmit}
   >
     {({ isSubmitting, status }) => (
-      <Form className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-contrast" htmlFor="dtFechaConsulta">
-            Fecha y hora
-          </label>
-          <Field
-            id="dtFechaConsulta"
-            name="dtFechaConsulta"
-            type="datetime-local"
-            className="w-full rounded-2xl border border-contrast/15 bg-surface px-4 py-2 text-sm text-contrast shadow-inner focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/40"
-          />
-          <ErrorMessage name="dtFechaConsulta" component="span" className="text-xs font-medium text-rose-500" />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-contrast" htmlFor="strDiagnostico">
-            Diagnóstico
-          </label>
-          <Field
-            id="strDiagnostico"
-            name="strDiagnostico"
-            className="w-full rounded-2xl border border-contrast/15 bg-surface px-4 py-2 text-sm text-contrast shadow-inner focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/40"
-          />
-          <ErrorMessage name="strDiagnostico" component="span" className="text-xs font-medium text-rose-500" />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-contrast" htmlFor="strTratamiento">
-              Tratamiento
-            </label>
-            <Field
-              as="textarea"
-              id="strTratamiento"
-              name="strTratamiento"
-              rows="3"
-              className="h-full w-full rounded-2xl border border-contrast/15 bg-surface px-4 py-2 text-sm text-contrast shadow-inner focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-contrast" htmlFor="strNotas">
-              Notas
-            </label>
-            <Field
-              as="textarea"
-              id="strNotas"
-              name="strNotas"
-              rows="3"
-              className="h-full w-full rounded-2xl border border-contrast/15 bg-surface px-4 py-2 text-sm text-contrast shadow-inner focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-contrast" htmlFor="strVeterinario">
-            Veterinario
-          </label>
-          <Field
-            id="strVeterinario"
-            name="strVeterinario"
-            className="w-full rounded-2xl border border-contrast/15 bg-surface px-4 py-2 text-sm text-contrast shadow-inner focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/40"
-          />
-        </div>
-        {status ? <span className="text-xs font-medium text-rose-500">{status}</span> : null}
-        <Motion.button
-          type="submit"
-          disabled={isSubmitting}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
-          className="btn-primary w-full justify-center disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          Guardar registro
-        </Motion.button>
+      <Form>
+        <Stack spacing={3}>
+          <Field name="dtFechaConsulta">
+            {({ field, meta }) => (
+              <TextField
+                {...field}
+                type="datetime-local"
+                fullWidth
+                label="Fecha y hora"
+                size="small"
+                variant="outlined"
+                InputLabelProps={{ shrink: true }}
+                error={meta.touched && Boolean(meta.error)}
+                helperText={meta.touched && meta.error ? meta.error : " "}
+              />
+            )}
+          </Field>
+
+          <Field name="strDiagnostico">
+            {({ field, meta }) => (
+              <TextField
+                {...field}
+                fullWidth
+                label="Diagnóstico"
+                size="small"
+                variant="outlined"
+                error={meta.touched && Boolean(meta.error)}
+                helperText={meta.touched && meta.error ? meta.error : " "}
+              />
+            )}
+          </Field>
+
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+            <Field name="strTratamiento">
+              {({ field, meta }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="Tratamiento"
+                  size="small"
+                  variant="outlined"
+                  multiline
+                  minRows={3}
+                  maxRows={5}
+                  error={meta.touched && Boolean(meta.error)}
+                  helperText={meta.touched && meta.error ? meta.error : " "}
+                />
+              )}
+            </Field>
+
+            <Field name="strNotas">
+              {({ field, meta }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="Notas"
+                  size="small"
+                  variant="outlined"
+                  multiline
+                  minRows={3}
+                  maxRows={5}
+                  error={meta.touched && Boolean(meta.error)}
+                  helperText={meta.touched && meta.error ? meta.error : " "}
+                />
+              )}
+            </Field>
+          </Stack>
+
+          <Field name="strVeterinario">
+            {({ field, meta }) => (
+              <TextField
+                {...field}
+                fullWidth
+                label="Veterinario"
+                size="small"
+                variant="outlined"
+                error={meta.touched && Boolean(meta.error)}
+                helperText={meta.touched && meta.error ? meta.error : " "}
+              />
+            )}
+          </Field>
+
+          {status ? <Alert severity="error" variant="outlined" sx={{ borderRadius: 3 }}>{status}</Alert> : null}
+
+          <MotionButton
+            type="submit"
+            variant="contained"
+            disabled={isSubmitting}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            disableElevation
+            fullWidth
+            sx={{ borderRadius: 999, py: 1.25, textTransform: "none" }}
+          >
+            Guardar registro
+          </MotionButton>
+        </Stack>
       </Form>
     )}
   </Formik>

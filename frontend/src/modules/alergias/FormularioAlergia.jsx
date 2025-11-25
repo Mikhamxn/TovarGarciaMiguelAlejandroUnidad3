@@ -1,10 +1,16 @@
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { motion as Motion } from "framer-motion";
+import TextField from "@mui/material/TextField";
+import Stack from "@mui/material/Stack";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
 
 const esquemaAlergia = Yup.object({
   strNombre: Yup.string().required("El nombre es obligatorio")
 });
+
+const MotionButton = Motion(Button);
 
 export const FormularioAlergia = ({ objInicial = {}, onSubmit }) => (
   <Formik
@@ -18,64 +24,82 @@ export const FormularioAlergia = ({ objInicial = {}, onSubmit }) => (
     onSubmit={onSubmit}
   >
     {({ isSubmitting, status }) => (
-      <Form className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-contrast" htmlFor="strNombre">
-            Nombre de la alergia
-          </label>
-          <Field
-            id="strNombre"
-            name="strNombre"
-            className="w-full rounded-xl border border-contrast/15 bg-surface px-4 py-2 text-sm text-contrast shadow-inner focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/40"
-          />
-          <ErrorMessage
-            name="strNombre"
-            component="span"
-            className="text-xs font-medium text-rose-500"
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-contrast" htmlFor="strSintomas">
-            Síntomas
-          </label>
-          <Field
-            id="strSintomas"
-            name="strSintomas"
-            className="w-full rounded-xl border border-contrast/15 bg-surface px-4 py-2 text-sm text-contrast shadow-inner focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/40"
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-contrast" htmlFor="strTratamiento">
-            Tratamiento
-          </label>
-          <Field
-            id="strTratamiento"
-            name="strTratamiento"
-            className="w-full rounded-xl border border-contrast/15 bg-surface px-4 py-2 text-sm text-contrast shadow-inner focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/40"
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-contrast" htmlFor="strNotas">
-            Notas
-          </label>
-          <Field
-            as="textarea"
-            id="strNotas"
-            name="strNotas"
-            rows="3"
-            className="w-full rounded-2xl border border-contrast/15 bg-surface px-4 py-2 text-sm text-contrast shadow-inner focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/40"
-          />
-        </div>
-        {status ? <span className="text-xs font-medium text-rose-500">{status}</span> : null}
-        <Motion.button
-          type="submit"
-          disabled={isSubmitting}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
-          className="btn-primary w-full justify-center disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          Guardar alergia
-        </Motion.button>
+      <Form>
+        <Stack spacing={3}>
+          <Field name="strNombre">
+            {({ field, meta }) => (
+              <TextField
+                {...field}
+                fullWidth
+                label="Nombre de la alergia"
+                size="small"
+                variant="outlined"
+                error={meta.touched && Boolean(meta.error)}
+                helperText={meta.touched && meta.error ? meta.error : " "}
+              />
+            )}
+          </Field>
+
+          <Field name="strSintomas">
+            {({ field, meta }) => (
+              <TextField
+                {...field}
+                fullWidth
+                label="Síntomas"
+                size="small"
+                variant="outlined"
+                error={meta.touched && Boolean(meta.error)}
+                helperText={meta.touched && meta.error ? meta.error : " "}
+              />
+            )}
+          </Field>
+
+          <Field name="strTratamiento">
+            {({ field, meta }) => (
+              <TextField
+                {...field}
+                fullWidth
+                label="Tratamiento"
+                size="small"
+                variant="outlined"
+                error={meta.touched && Boolean(meta.error)}
+                helperText={meta.touched && meta.error ? meta.error : " "}
+              />
+            )}
+          </Field>
+
+          <Field name="strNotas">
+            {({ field, meta }) => (
+              <TextField
+                {...field}
+                fullWidth
+                label="Notas"
+                size="small"
+                variant="outlined"
+                multiline
+                minRows={3}
+                maxRows={5}
+                error={meta.touched && Boolean(meta.error)}
+                helperText={meta.touched && meta.error ? meta.error : " "}
+              />
+            )}
+          </Field>
+
+          {status ? <Alert severity="error" variant="outlined" sx={{ borderRadius: 3 }}>{status}</Alert> : null}
+
+          <MotionButton
+            type="submit"
+            variant="contained"
+            disabled={isSubmitting}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            disableElevation
+            fullWidth
+            sx={{ borderRadius: 999, py: 1.25, textTransform: "none" }}
+          >
+            Guardar alergia
+          </MotionButton>
+        </Stack>
       </Form>
     )}
   </Formik>

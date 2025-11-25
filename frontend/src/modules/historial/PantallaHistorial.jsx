@@ -1,7 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { motion as Motion, AnimatePresence } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import HistoryIcon from "@mui/icons-material/History";
 import MedicalInformationIcon from "@mui/icons-material/MedicalInformation";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import IconButton from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
+import Typography from "@mui/material/Typography";
+import CloseIcon from "@mui/icons-material/Close";
 import { clienteHttp } from "../../api/clienteHttp";
 import { EstadoVistaVacia } from "../../components/EstadoVistaVacia";
 import { FormularioHistorial } from "./FormularioHistorial";
@@ -49,131 +59,136 @@ export const PantallaHistorial = () => {
 
   const objMascotaActual = arrMascotas.find((objMascota) => objMascota.intMascota === intMascotaSeleccionada) ?? null;
   const hayMascotas = useMemo(() => arrMascotas.length > 0, [arrMascotas.length]);
+  const cerrarModal = () => setBlnModal(false);
 
   return (
     <div className="page-flow">
-        <EncabezadoPagina
-          etiqueta="Seguimiento clínico"
-          titulo="Historial médico integral"
-          descripcion="Consulta diagnósticos, tratamientos y notas con alta legibilidad para mantener la continuidad clínica de cada paciente."
-          acciones={
-            <Motion.button
-              type="button"
-              onClick={() => setBlnModal(true)}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              disabled={!intMascotaSeleccionada}
-              className="btn-primary"
+      <EncabezadoPagina
+        etiqueta="Seguimiento clínico"
+        titulo="Historial médico integral"
+        descripcion="Consulta diagnósticos, tratamientos y notas con alta legibilidad para mantener la continuidad clínica de cada paciente."
+        acciones={
+          <Motion.button
+            type="button"
+            onClick={() => setBlnModal(true)}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            disabled={!intMascotaSeleccionada}
+            className="btn-primary"
+          >
+            Registrar consulta
+          </Motion.button>
+        }
+        ilustracion={
+          <div className="icon-stack">
+            <span className="icon-stack__badge">
+              <HistoryIcon fontSize="large" />
+            </span>
+            <p className="icon-stack__caption">Historial sincronizado</p>
+          </div>
+        }
+      />
+
+      <section className="surface-card section-card">
+        <header className="section-card__header">
+          <span className="eyebrow">Ficha clínica</span>
+          <h3 className="section-card__title">Selecciona un paciente</h3>
+          <p className="section-card__subtitle">Elige una mascota para revisar y documentar su historial clínico.</p>
+        </header>
+        <div className="form-grid form-grid--split">
+          <div className="form-field">
+            <label className="form-field__label" htmlFor="filtro-mascota">
+              Mascota
+            </label>
+            <TextField
+              id="filtro-mascota"
+              select
+              fullWidth
+              size="small"
+              value={intMascotaSeleccionada ?? ""}
+              onChange={(event) => {
+                const strValor = event.target.value;
+                setIntMascotaSeleccionada(strValor ? Number(strValor) : null);
+              }}
+              disabled={!hayMascotas}
+              helperText={hayMascotas ? "" : "Registra una mascota para comenzar"}
             >
-              Registrar consulta
-            </Motion.button>
-          }
-          ilustracion={
-            <div className="icon-stack">
-              <span className="icon-stack__badge">
-                <HistoryIcon fontSize="large" />
-              </span>
-              <p className="icon-stack__caption">Historial sincronizado</p>
-            </div>
-          }
-        />
-
-        <section className="surface-card section-card">
-          <header className="section-card__header">
-            <span className="eyebrow">Ficha clínica</span>
-            <h3 className="section-card__title">Selecciona un paciente</h3>
-            <p className="section-card__subtitle">Elige una mascota para revisar y documentar su historial clínico.</p>
-          </header>
-          <div className="form-grid form-grid--split">
-            <div className="form-field">
-              <label className="form-field__label" htmlFor="filtro-mascota">
-                Mascota
-              </label>
-              <select
-                id="filtro-mascota"
-                value={intMascotaSeleccionada ?? ""}
-                onChange={(event) => {
-                  const strValor = event.target.value;
-                  setIntMascotaSeleccionada(strValor ? Number(strValor) : null);
-                }}
-                disabled={!hayMascotas}
-              >
-                <option value="">Selecciona una mascota</option>
-                {arrMascotas.map((objMascota) => (
-                  <option key={objMascota.intMascota} value={objMascota.intMascota}>
-                    {objMascota.strNombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {objMascotaActual ? (
-              <Motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="info-panel">
-                <div className="info-panel__lead">
-                  <span className="info-panel__lead-icon">
-                    <MedicalInformationIcon fontSize="small" />
-                  </span>
-                  <p>{objMascotaActual.strNombre}</p>
-                </div>
-                {objMascotaActual.strEspecie ? <p className="info-panel__subtitle">{objMascotaActual.strEspecie}</p> : null}
-              </Motion.div>
-            ) : (
-              <div className="empty-hint">Elige un paciente para ver sus registros clínicos</div>
-            )}
+              <MenuItem value="">Selecciona una mascota</MenuItem>
+              {arrMascotas.map((objMascota) => (
+                <MenuItem key={objMascota.intMascota} value={objMascota.intMascota}>
+                  {objMascota.strNombre}
+                </MenuItem>
+              ))}
+            </TextField>
           </div>
-        </section>
-
-        {arrHistorial.length === 0 ? (
-          <EstadoVistaVacia strMensaje="No hay registros médicos" />
-        ) : (
-          <div className="card-grid card-grid--three">
-            {arrHistorial.map((objRegistro) => (
-              <Motion.article key={objRegistro.intHistorial} whileHover={{ y: -4 }} className="surface-card record-card">
-                <div className="record-card__header">
-                  <strong className="record-card__timestamp">
-                    {new Date(objRegistro.dtFechaConsulta).toLocaleString()}
-                  </strong>
-                  <span className="badge-pill badge-pill--soft">Consulta</span>
-                </div>
-                <p className="record-card__text">
-                  <strong>Diagnóstico:</strong> {objRegistro.strDiagnostico}
-                </p>
-                {objRegistro.strTratamiento ? (
-                  <p className="record-card__text">
-                    <strong>Tratamiento:</strong> {objRegistro.strTratamiento}
-                  </p>
-                ) : null}
-                {objRegistro.strNotas ? (
-                  <p className="record-card__text">
-                    <strong>Notas:</strong> {objRegistro.strNotas}
-                  </p>
-                ) : null}
-                {objRegistro.strVeterinario ? <span className="record-card__footer">{objRegistro.strVeterinario}</span> : null}
-              </Motion.article>
-            ))}
-          </div>
-        )}
-
-        <AnimatePresence>
-          {blnModal ? (
-            <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-overlay">
-              <Motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="modal-dialog">
-                <h3 className="modal-dialog__title">Nueva consulta para {objMascotaActual?.strNombre ?? ""}</h3>
-                <FormularioHistorial onSubmit={crearRegistro} />
-                <div className="modal-dialog__actions">
-                  <Motion.button
-                    type="button"
-                    onClick={() => setBlnModal(false)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.96 }}
-                    className="modal-dialog__close"
-                  >
-                    Cancelar
-                  </Motion.button>
-                </div>
-              </Motion.div>
+          {objMascotaActual ? (
+            <Motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="info-panel">
+              <div className="info-panel__lead">
+                <span className="info-panel__lead-icon">
+                  <MedicalInformationIcon fontSize="small" />
+                </span>
+                <p>{objMascotaActual.strNombre}</p>
+              </div>
+              {objMascotaActual.strEspecie ? <p className="info-panel__subtitle">{objMascotaActual.strEspecie}</p> : null}
             </Motion.div>
-          ) : null}
-        </AnimatePresence>
-      </div>
-    );
+          ) : (
+            <div className="empty-hint">Elige un paciente para ver sus registros clínicos</div>
+          )}
+        </div>
+      </section>
+
+      {arrHistorial.length === 0 ? (
+        <EstadoVistaVacia strMensaje="No hay registros médicos" />
+      ) : (
+        <div className="card-grid card-grid--three">
+          {arrHistorial.map((objRegistro) => (
+            <Motion.article key={objRegistro.intHistorial} whileHover={{ y: -4 }} className="surface-card record-card">
+              <div className="record-card__header">
+                <strong className="record-card__timestamp">
+                  {new Date(objRegistro.dtFechaConsulta).toLocaleString()}
+                </strong>
+                <span className="badge-pill badge-pill--soft">Consulta</span>
+              </div>
+              <p className="record-card__text">
+                <strong>Diagnóstico:</strong> {objRegistro.strDiagnostico}
+              </p>
+              {objRegistro.strTratamiento ? (
+                <p className="record-card__text">
+                  <strong>Tratamiento:</strong> {objRegistro.strTratamiento}
+                </p>
+              ) : null}
+              {objRegistro.strNotas ? (
+                <p className="record-card__text">
+                  <strong>Notas:</strong> {objRegistro.strNotas}
+                </p>
+              ) : null}
+              {objRegistro.strVeterinario ? <span className="record-card__footer">{objRegistro.strVeterinario}</span> : null}
+            </Motion.article>
+          ))}
+        </div>
+      )}
+
+      <Dialog open={blnModal} onClose={cerrarModal} fullWidth maxWidth="md">
+        <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+          <Typography variant="h6" component="span" className="font-display">
+            Nueva consulta {objMascotaActual ? `para ${objMascotaActual.strNombre}` : ""}
+          </Typography>
+          <IconButton onClick={cerrarModal} aria-label="Cerrar" size="small" sx={{ color: "text.secondary" }}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{ pb: 0 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Captura diagnósticos, tratamientos y notas para mantener un historial clínico completo.
+          </Typography>
+          <FormularioHistorial onSubmit={crearRegistro} />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={cerrarModal} color="secondary" variant="outlined">
+            Cancelar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  );
 };

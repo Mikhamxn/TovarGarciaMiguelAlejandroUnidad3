@@ -1,7 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { motion as Motion, AnimatePresence } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import CoronavirusIcon from "@mui/icons-material/Coronavirus";
 import PetsIcon from "@mui/icons-material/Pets";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import IconButton from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
+import Typography from "@mui/material/Typography";
+import CloseIcon from "@mui/icons-material/Close";
 import { clienteHttp } from "../../api/clienteHttp";
 import { EstadoVistaVacia } from "../../components/EstadoVistaVacia";
 import { FormularioAlergia } from "./FormularioAlergia";
@@ -49,6 +59,7 @@ export const PantallaAlergias = () => {
 
   const objMascotaActual = arrMascotas.find((objMascota) => objMascota.intMascota === intMascotaSeleccionada) ?? null;
   const hayMascotas = useMemo(() => arrMascotas.length > 0, [arrMascotas.length]);
+  const cerrarModal = () => setBlnModal(false);
 
   return (
     <div className="page-flow">
@@ -89,22 +100,26 @@ export const PantallaAlergias = () => {
             <label className="form-field__label" htmlFor="filtro-alergias-mascota">
               Mascota
             </label>
-            <select
+            <TextField
               id="filtro-alergias-mascota"
+              select
+              fullWidth
+              size="small"
               value={intMascotaSeleccionada ?? ""}
               onChange={(event) => {
                 const strValor = event.target.value;
                 setIntMascotaSeleccionada(strValor ? Number(strValor) : null);
               }}
               disabled={!hayMascotas}
+              helperText={hayMascotas ? "" : "Registra una mascota para comenzar"}
             >
-              <option value="">Selecciona una mascota</option>
+              <MenuItem value="">Selecciona una mascota</MenuItem>
               {arrMascotas.map((objMascota) => (
-                <option key={objMascota.intMascota} value={objMascota.intMascota}>
+                <MenuItem key={objMascota.intMascota} value={objMascota.intMascota}>
                   {objMascota.strNombre}
-                </option>
+                </MenuItem>
               ))}
-            </select>
+            </TextField>
           </div>
           {objMascotaActual ? (
             <Motion.div
@@ -160,28 +175,27 @@ export const PantallaAlergias = () => {
         </div>
       )}
 
-      <AnimatePresence>
-        {blnModal ? (
-          <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-overlay">
-            <Motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="modal-dialog">
-              <h3 className="modal-dialog__title">Nueva alergia para {objMascotaActual?.strNombre ?? ""}</h3>
-              <p className="section-card__subtitle">Completa el formulario para registrar el episodio alérgico.</p>
-              <FormularioAlergia onSubmit={crearAlergia} />
-              <div className="modal-dialog__actions">
-                <Motion.button
-                  type="button"
-                  onClick={() => setBlnModal(false)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.96 }}
-                  className="modal-dialog__close"
-                >
-                  Cancelar
-                </Motion.button>
-              </div>
-            </Motion.div>
-          </Motion.div>
-        ) : null}
-      </AnimatePresence>
+      <Dialog open={blnModal} onClose={cerrarModal} fullWidth maxWidth="md">
+        <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+          <Typography variant="h6" component="span" className="font-display">
+            Nueva alergia {objMascotaActual ? `para ${objMascotaActual.strNombre}` : ""}
+          </Typography>
+          <IconButton onClick={cerrarModal} aria-label="Cerrar" size="small" sx={{ color: "text.secondary" }}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{ pb: 0 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Completa el formulario para registrar el episodio alérgico.
+          </Typography>
+          <FormularioAlergia onSubmit={crearAlergia} />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={cerrarModal} color="secondary" variant="outlined">
+            Cancelar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

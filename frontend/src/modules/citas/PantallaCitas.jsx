@@ -1,7 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { motion as Motion, AnimatePresence } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import ScheduleIcon from "@mui/icons-material/Schedule";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import IconButton from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
+import Typography from "@mui/material/Typography";
+import CloseIcon from "@mui/icons-material/Close";
 import { clienteHttp } from "../../api/clienteHttp";
 import { EstadoVistaVacia } from "../../components/EstadoVistaVacia";
 import { EncabezadoPagina } from "../../components/EncabezadoPagina";
@@ -49,6 +59,7 @@ export const PantallaCitas = () => {
 
   const objMascotaActual = arrMascotas.find((objMascota) => objMascota.intMascota === intMascotaSeleccionada) ?? null;
   const hayMascotas = useMemo(() => arrMascotas.length > 0, [arrMascotas.length]);
+  const cerrarModal = () => setBlnModal(false);
 
   return (
     <div className="page-flow">
@@ -93,22 +104,26 @@ export const PantallaCitas = () => {
             <label className="form-field__label" htmlFor="filtro-citas-mascota">
               Mascota
             </label>
-            <select
+            <TextField
               id="filtro-citas-mascota"
+              select
+              fullWidth
+              size="small"
               value={intMascotaSeleccionada ?? ""}
               onChange={(event) => {
                 const strValor = event.target.value;
                 setIntMascotaSeleccionada(strValor ? Number(strValor) : null);
               }}
               disabled={!hayMascotas}
+              helperText={hayMascotas ? "" : "Registra una mascota para agendar citas"}
             >
-              <option value="">Selecciona una mascota</option>
+              <MenuItem value="">Selecciona una mascota</MenuItem>
               {arrMascotas.map((objMascota) => (
-                <option key={objMascota.intMascota} value={objMascota.intMascota}>
+                <MenuItem key={objMascota.intMascota} value={objMascota.intMascota}>
                   {objMascota.strNombre}
-                </option>
+                </MenuItem>
               ))}
-            </select>
+            </TextField>
           </div>
           {objMascotaActual ? (
             <Motion.div
@@ -170,35 +185,27 @@ export const PantallaCitas = () => {
         </div>
       )}
 
-      <AnimatePresence>
-        {blnModal ? (
-          <Motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 px-4 backdrop-blur"
-          >
-            <Motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-lg rounded-3xl border border-contrast/10 bg-surface/95 p-6 text-contrast shadow-lg"
-            >
-              <h3 className="mb-4 font-display text-xl font-semibold">Nueva cita para {objMascotaActual?.strNombre ?? ""}</h3>
-              <FormularioCita onSubmit={crearCita} />
-              <Motion.button
-                type="button"
-                onClick={() => setBlnModal(false)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.96 }}
-                className="mt-4 w-full rounded-xl border border-contrast/20 px-4 py-2 text-sm font-medium text-contrast/70 transition hover:border-accent/40 hover:text-accent"
-              >
-                Cancelar
-              </Motion.button>
-            </Motion.div>
-          </Motion.div>
-        ) : null}
-      </AnimatePresence>
+      <Dialog open={blnModal} onClose={cerrarModal} fullWidth maxWidth="md">
+        <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+          <Typography variant="h6" component="span" className="font-display">
+            Nueva cita {objMascotaActual ? `para ${objMascotaActual.strNombre}` : ""}
+          </Typography>
+          <IconButton onClick={cerrarModal} aria-label="Cerrar" size="small" sx={{ color: "text.secondary" }}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{ pb: 0 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Planifica la atención registrando los detalles clave de la cita y confirma su estado.
+          </Typography>
+          <FormularioCita onSubmit={crearCita} />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={cerrarModal} color="secondary" variant="outlined">
+            Cancelar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
